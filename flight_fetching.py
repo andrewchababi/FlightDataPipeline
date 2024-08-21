@@ -1,6 +1,7 @@
 import requests
 import json
 import pandas as pd
+import numpy as np
 
 
 SEPARATOR = """
@@ -74,7 +75,29 @@ def convert_to_dataframe(json_data, key='data'):
     return pd.json_normalize(json_data[key])
 
 
+def process_flights_to_df(url):
+    # Fetch the flight data
+    response = fetch_flight_data(url)
+    print(f"HTTP Status Code: {response.status_code}")
 
+    # Step 1: Raw Data
+    step_separator("FIRST STEP RAW DATA")
+    raw_data = response.content
+    #print(raw_data)
 
+    # Step 2: Structured Data
+    step_separator("SECOND STEP STRUCTURED DATA")
+    structured_data = parse_json_content(raw_data)
+    #print(structured_data)
 
+    # Step 3: JSON Format Data
+    step_separator("THIRD STEP JSON FORMAT DATA")
+    flights_df = convert_to_dataframe(structured_data)
+    #print(flights_df.head())
 
+    # Display columns of interest
+    columns_of_interest = ['id', 'type', 'flight', 'planned', 'revised', 'company', 'compagny_without_accent', 'destination', 'gate']
+    #print(flights_df[columns_of_interest].head())
+
+    # Return the DataFrame for further use
+    return flights_df

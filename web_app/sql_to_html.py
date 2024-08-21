@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 # Database connection string
 DATABASE_URI = 'mysql+pymysql://root:VavaChab!2!6@localhost:3306/flights_data'
 
@@ -21,7 +20,7 @@ SELECT flight,
        DATE_FORMAT(FROM_UNIXTIME(revised), '%Y-%m-%d %H:%i') AS revised_time
 FROM flights
 WHERE CAST(gate AS UNSIGNED) BETWEEN 62 AND 68
-  AND DATE(FROM_UNIXTIME(planned)) = '2024-08-01'
+  AND DATE(FROM_UNIXTIME(planned)) = '2024-08-20'
 ORDER BY planned_time;
 """)
 
@@ -89,6 +88,7 @@ def main():
     engine = create_engine_connection(DATABASE_URI)
     df = fetch_data_to_dataframe(engine, QUERY)
     save_dataframe_to_html(df, 'templates/sql-data.html')
+    print(len(df))
 
 
 if __name__ == '__main__':
