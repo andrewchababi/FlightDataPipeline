@@ -88,7 +88,6 @@ def main():
     """
     Main function to execute the script.
     """
-    print(todays_date)
     engine = create_engine_connection(DATABASE_URI)
     df = fetch_data_to_dataframe(engine, QUERY)
     save_dataframe_to_html(df, 'templates/sql-data.html')
