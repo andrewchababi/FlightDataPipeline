@@ -1,5 +1,6 @@
 from flight_fetching import *
 import logging
+from datetime import date
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,19 +11,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Database connection string
 DATABASE_URI = 'mysql+pymysql://root:VavaChab!2!6@localhost:3306/flights_data'
 
+# Today's date
+todays_date = date.today().strftime('%Y-%m-%d')
+
 # SQL query to fetch data from a specific table
-QUERY = text("""
+QUERY = f"""
 SELECT flight, 
-       DATE_FORMAT(FROM_UNIXTIME(planned), '%Y-%m-%d %H:%i') AS planned_time, 
+       DATE_FORMAT(FROM_UNIXTIME(planned), '%%Y-%%m-%%d %%H:%%i') AS planned_time, 
        destination,
        gate, 
        company, 
-       DATE_FORMAT(FROM_UNIXTIME(revised), '%Y-%m-%d %H:%i') AS revised_time
+       DATE_FORMAT(FROM_UNIXTIME(revised), '%%Y-%%m-%%d %%H:%%i') AS revised_time
 FROM flights
 WHERE CAST(gate AS UNSIGNED) BETWEEN 62 AND 68
-  AND DATE(FROM_UNIXTIME(planned)) = '2024-08-20'
-ORDER BY planned_time;
-""")
+  AND DATE(FROM_UNIXTIME(planned)) = '{todays_date}'
+ORDER BY planned_time;"""
 
 
 def create_engine_connection(uri):
@@ -88,7 +91,6 @@ def main():
     engine = create_engine_connection(DATABASE_URI)
     df = fetch_data_to_dataframe(engine, QUERY)
     save_dataframe_to_html(df, 'templates/sql-data.html')
-    print(len(df))
 
 
 if __name__ == '__main__':
