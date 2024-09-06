@@ -6,7 +6,7 @@ todays_date = datetime.date.today()
 
 url = 'https://www.admtl.com/en/admtldata/api/flight?type=departure&sort=field_planned&direction=ASC&rule=24h'
 
-columns_of_interest = ['id', 'flight', 'planned', 'revised', 'compagny_without_accent', 'destination', 'gate']
+columns_of_interest = ['id', 'flight', 'planned', 'revised', 'destination', 'gate']
 
 
 
@@ -38,6 +38,7 @@ def filter_df_columns(filtered_df):
 def fix_time_columnn(df):
     df['planned'] = pd.to_datetime(df['planned'], unit='s') - pd.Timedelta(hours=4)
     df['revised'] = pd.to_datetime(df['revised'], unit='s') - pd.Timedelta(hours=4)
+    return df
 
 
 def main():

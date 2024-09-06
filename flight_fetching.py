@@ -81,17 +81,17 @@ def process_flights_to_df(url):
     print(f"HTTP Status Code: {response.status_code}")
 
     # Step 1: Raw Data
-    step_separator("FIRST STEP RAW DATA")
+    #step_separator("FIRST STEP RAW DATA")
     raw_data = response.content
     #print(raw_data)
 
     # Step 2: Structured Data
-    step_separator("SECOND STEP STRUCTURED DATA")
+    #step_separator("SECOND STEP STRUCTURED DATA")
     structured_data = parse_json_content(raw_data)
     #print(structured_data)
 
     # Step 3: JSON Format Data
-    step_separator("THIRD STEP JSON FORMAT DATA")
+    #step_separator("THIRD STEP JSON FORMAT DATA")
     flights_df = convert_to_dataframe(structured_data)
     #print(flights_df.head())
 
