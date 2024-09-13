@@ -1,6 +1,5 @@
-from flight_fetching import *
+from flight_fetching import process_flights_to_df
 from sqlalchemy import create_engine
-import pymysql
 
 
 def store_dataframe_to_mysql(df, table_name, connection_string):
