@@ -1,9 +1,9 @@
-from flight_fetching import *
-import logging
-from datetime import date
-import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import date
+
+import pandas as pd
+import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
