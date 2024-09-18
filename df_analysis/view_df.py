@@ -5,8 +5,8 @@ import pandas as pd
 
 
 class ViewDF(BaseDf):
-    def __init__(self, url = 'https://www.admtl.com/en/admtldata/api/flight?type=departure&sort=field_planned&direction=ASC&rule=24h'):
-        super().__init__(url)
+    def __init__(self):
+        super().__init__()
         self.columns_of_interest = ['flight', 'time', 'destination', 'gate']
         self.todays_date = datetime.date.today()
         self.process_data()
@@ -80,7 +80,7 @@ class ViewDF(BaseDf):
 
 def main():
     view_df = ViewDF()
-    view_df.df.to_html('view_df-html.html')
+    view_df.df.to_html('template/view_df-html.html')
 
 
 if __name__ == '__main__':
