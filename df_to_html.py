@@ -10,7 +10,7 @@ class FlightDataProcessor:
     This includes filtering, transforming, and exporting the data.
     """
 
-    def __init__(self, url, columns_of_interest):
+    def __init__(self, url, columns_of_interest, order):
         """
         Initialize the processor with the URL and relevant columns.
 
@@ -21,6 +21,7 @@ class FlightDataProcessor:
         self.columns_of_interest = columns_of_interest
         self.todays_date = datetime.date.today()
         self.df = pd.DataFrame()
+        self.order = order
 
     def fetch_and_process_data(self):
         """Fetch flight data from the API and process it with the required filters and transformations."""
@@ -31,6 +32,8 @@ class FlightDataProcessor:
             self.df = self.fix_time_columns(self.df)
             self.df = self.split_planned_column(self.df)
             self.df = self.filter_today_flights(self.df)
+            self.df = self.reorder_columns(self.df, self.order)
+
         except Exception as e:
             print(f"An error occurred while processing the data: {e}")
             raise
@@ -98,6 +101,16 @@ class FlightDataProcessor:
         """
         return df.rename(columns={'compagny_without_accent': 'company'})
 
+    def reorder_columns(self, df, order):
+        """
+        reorders the columns of the df according to the display needs
+
+        :param df: A Pandas DataFrame
+        :param order: A list with the name of the columns you would like to order them in
+        :return: The ordered Df
+        """
+        return df[order]
+
     def export_to_html(self, output_path):
         """Save the processed DataFrame as an HTML file."""
         try:
@@ -110,14 +123,16 @@ class FlightDataProcessor:
 def main():
     url = 'https://www.admtl.com/en/admtldata/api/flight?type=departure&sort=field_planned&direction=ASC&rule=24h'
     columns_of_interest = ['id', 'flight', 'planned', 'revised', 'destination', 'gate']
+    ordered_columns = ['id', 'flight', 'time', 'destination', 'gate']
 
-    processor = FlightDataProcessor(url, columns_of_interest)
+    processor = FlightDataProcessor(url, columns_of_interest, ordered_columns)
 
     # Fetch and process flight data
     processor.fetch_and_process_data()
 
     # Rename columns and export to HTML
     processor.df = processor.rename_columns(processor.df)
+
     processor.export_to_html('templates/df-data.html')
 
 
