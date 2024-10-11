@@ -1,13 +1,17 @@
-from base_df_class import BaseDf
-
 import datetime
 import pandas as pd
+from sqlalchemy import create_engine
+
+query = 'SELECT * FROM flights'
+
+connection_string = 'mysql+pymysql://root:VavaChab!2!6@localhost:3306/flights_data'
 
 
-class ViewDF(BaseDf):
+class ViewDF():
     def __init__(self):
-        super().__init__()
-        self.columns_of_interest = ['flight', 'time', 'destination', 'gate']
+        self.engine = create_engine(connection_string)
+        self.df = pd.read_sql(query, self.engine)
+        self.columns_of_interest = ['flight', 'time', 'destination', 'gate', 'delayed', 'revised-time']
         self.todays_date = datetime.date.today()
         self.process_data()
 
@@ -18,6 +22,7 @@ class ViewDF(BaseDf):
             self.df = self.filter_flights_by_gate_range(self.df)
             self.df = self.fix_time_columns(self.df)
             self.df = self.split_planned_column(self.df)
+            self.df = self.add_delay_status(self.df)
             self.df = self.filter_today_flights(self.df)
             self.df = self.filter_columns(self.df)
         except Exception as e:
@@ -45,8 +50,9 @@ class ViewDF(BaseDf):
         :param df: DataFrame - DataFrame with raw time columns.
         :return: DataFrame - DataFrame with fixed time columns.
         """
-        df['planned'] = pd.to_datetime(df['planned'], unit='s') - pd.Timedelta(hours=4)
-        df['revised'] = pd.to_datetime(df['revised'], unit='s') - pd.Timedelta(hours=4)
+        df['planned'] = pd.to_datetime(pd.to_numeric(df['planned'], errors='coerce'), unit='s') - pd.Timedelta(hours=4)
+        df['revised'] = pd.to_datetime(pd.to_numeric(df['revised'], errors='coerce'), unit='s') - pd.Timedelta(hours=4)
+
         return df
 
     def split_planned_column(self, df):
@@ -58,6 +64,19 @@ class ViewDF(BaseDf):
         """
         df['date'] = df['planned'].dt.date
         df['time'] = df['planned'].dt.time
+        df['revised-time'] = df['revised'].dt.time
+        return df
+
+    def add_delay_status(self, df):
+        """
+        Adds a 'delay_status' column indicating whether the flight is delayed.
+
+        :param df: DataFrame - The DataFrame with flight data.
+        :return: DataFrame - DataFrame with an additional column 'delay_status'.
+        """
+        df['delayed'] = (df['revised'] - df['planned']).apply(
+            lambda x: 'True' if x > pd.Timedelta(minutes=0) else 'False'
+        )
         return df
 
     def filter_today_flights(self, df):
@@ -78,9 +97,29 @@ class ViewDF(BaseDf):
         """
         return df[self.columns_of_interest]
 
+    def store_to_db(self, table_name, connection_string):
+        """
+        Store the DataFrame into a MySQL table.
+
+        :param table_name: str - The name of the table to store the data.
+        :param connection_string: str - The MySQL connection string.
+        """
+        engine = create_engine(connection_string)
+        try:
+            self.df.to_sql(table_name, con=engine, if_exists='replace', index=False)
+            print(f"Data stored in table '{table_name}' successfully.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+
+
+
 def main():
-    view_df = ViewDF()
-    view_df.df.to_html('template/view_df-html.html')
+
+    data = ViewDF()
+    data.store_to_db('view_table', connection_string)
+    df = data.df
+    df.to_html('template/view_df-html.html')
 
 
 if __name__ == '__main__':

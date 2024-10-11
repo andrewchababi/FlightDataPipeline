@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import date
+
 
 import pandas as pd
 import logging
@@ -11,20 +11,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Database connection string
 DATABASE_URI = 'mysql+pymysql://root:VavaChab!2!6@localhost:3306/flights_data'
 
-# Today's date
-todays_date = date.today().strftime('%Y-%m-%d')
+
 
 # SQL query to fetch data from a specific table
 QUERY = f"""
 SELECT flight, 
-       DATE_FORMAT(FROM_UNIXTIME(planned), '%%Y-%%m-%%d %%H:%%i') AS planned_time, 
+       DATE_FORMAT(FROM_UNIXTIME(planned), '%%H:%%i') AS planned_time, 
        destination,
        gate, 
-       company, 
-       DATE_FORMAT(FROM_UNIXTIME(revised), '%%Y-%%m-%%d %%H:%%i') AS revised_time
+       DATE_FORMAT(FROM_UNIXTIME(revised), '%%H:%%i') AS revised_time
 FROM flights
 WHERE CAST(gate AS UNSIGNED) BETWEEN 62 AND 68
-  AND DATE(FROM_UNIXTIME(planned)) = '{todays_date}'
+  AND DATE(FROM_UNIXTIME(planned)) = CURDATE()
 ORDER BY planned_time;"""
 
 
